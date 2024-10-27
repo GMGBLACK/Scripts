@@ -1,0 +1,107 @@
+local Run = game:service'RunService'
+local Tep = game:service'TeleportService'
+-- Instances --
+if game.Players.LocalPlayer then
+else
+    game.Players.PlayerAdded:Wait()
+end 
+local plr = game.Players.LocalPlayer
+-- Presets --
+local AllowedUsers = {"Db_Black0"} -- Add alts u wanna auto
+local FailSafeStarted = false
+local CanRun1 = true
+local waittime = .35 -- .35 is default
+local PowerScale = .01
+local BlastAt = Vector3.new(-2662, 4863, -2711)
+local CharPos = CFrame.new(-2775, 4861, -2782)
+local Position = Vector3.new(-2662, 4863, -2711) -- Normal: 78.03720092773438, 4938.62646484375, -1166.8460693359375 -- Average: -2662, 4863, -2711 --
+-- Functions --
+local function LoopBeam()
+    while task.wait() do
+        wait(waittime)
+        game:GetService("ReplicatedStorage").Events.beam:FireServer(true,"Energy Wave","Yellow",3,Position,PowerScale,30,plr.Character:FindFirstChild("Energy Wave"),6,8,40,1)
+        wait(waittime)
+        game:GetService("ReplicatedStorage").Events.beam:FireServer(true,"Energy Wave","Yellow",3,Position,PowerScale,30,plr.Character:FindFirstChild("Energy Wave"),6,8,40,1)
+        wait(waittime)
+        game:GetService("ReplicatedStorage").Events.beam:FireServer(true,"Energy Wave","Blue",3,Position,PowerScale,30,plr.Character:FindFirstChild("Energy Wave"),6,8,40,1)
+        wait(waittime)
+        game:GetService("ReplicatedStorage").Events.beam:FireServer(true,"Energy Wave","Purple",3,Position,PowerScale,30,plr.Character:FindFirstChild("Energy Wave"),6,8,40,1)
+    end 
+end 
+local function FailSafe()
+    while true do
+        Sekai = game:GetService("ReplicatedStorage").Datas[plr.Name].Speed.Value
+        wait(5)
+        if Sekai == game:GetService("ReplicatedStorage").Datas[plr.Name].Speed.Value then
+            print"Start1"
+            wait(7.5)
+            if Sekai == game:GetService("ReplicatedStorage").Datas[plr.Name].Speed.Value then
+                plr:Kick("Rejoining")
+    	  	    wait(5)
+    		    Tep:Teleport(1456080999)
+            end 
+        end
+    end 
+end 
+-- Showtime --
+if game.PlaceId == 1456080999 then
+    Sekai = game.ReplicatedStorage:WaitForChild"Datas":WaitForChild(plr.Name):WaitForChild"Speed".Value
+    Run.Heartbeat:Connect(function()
+        if FailSafeStarted == false then
+            FailSafeStarted = true
+            FailSafe()
+        end 
+    end)
+    Run.Heartbeat:Connect(function()
+        plr.PlayerGui.LocalScript:Destroy()
+    end)
+    repeat wait() until game:IsLoaded()
+    if table.find(AllowedUsers,plr.Name) then
+        game:GetService("ReplicatedStorage").Events.RealStart:InvokeServer()
+        plr.CharacterAdded:Connect(function()
+            game:GetService("ReplicatedStorage").Events.RealStart:InvokeServer()
+        end)
+        Run.Heartbeat:Connect(function()
+            game:GetService("ReplicatedStorage").Events.giveskill:FireServer("Energy Wave")
+            plr.Backpack:FindFirstChild("Energy Wave").Parent = plr.Character
+        end)
+        game:GetService("ReplicatedStorage").Datas[plr.Name].Speed.Changed:Connect(function(Val)
+            if Val > 499 and CanRun1 == true then
+                CanRun1 = false
+                game:GetService("ReplicatedStorage").Events.re:InvokeServer()
+                wait(5)
+                CanRun1 = true
+            end 
+        end)
+        Run.Heartbeat:Connect(function()
+            plr.Character.HumanoidRootPart.CFrame = CharPos -- Normal: (54, 4931, -1402) Grinder Fast: ( 636, 4928, -53) -- Average: -2775, 4861, -2782
+        end)
+        Run.Heartbeat:Connect(function()
+            game:GetService("ReplicatedStorage").Events.charge:FireServer(plr.Character.HumanoidRootPart, true)
+        end)
+        Run.Heartbeat:Connect(function()
+            game:GetService("ReplicatedStorage").Events.blast:FireServer(true, plr.Character.Effects, BlastAt, plr.Character.RightHand)
+        end)
+        game:GetService("CoreGui"):WaitForChild"RobloxPromptGui":WaitForChild"promptOverlay".ChildAdded:connect(function(child)
+            if child.Name == "ErrorPrompt" and child:FindFirstChild("MessageArea") and child.MessageArea:FindFirstChild("ErrorFrame") then
+                Run.Heartbeat:connect(function()
+                    Tep:Teleport(1456080999,LocalPlayer)
+                end)
+            end
+        end)
+        local FNE = false
+        Run.Heartbeat:Connect(function()
+            if FNE == false then
+                FNE = true
+                LoopBeam()
+            end 
+        end)
+        print"ALL DONE"
+    end 
+else
+    repeat wait() until game:IsLoaded()
+    wait(2)
+    Run.Heartbeat:Connect(function()
+        Tep:Teleport(1456080999)
+    end)
+end
